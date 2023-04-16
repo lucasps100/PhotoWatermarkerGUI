@@ -59,7 +59,7 @@ def saveas():
         mode='w'
     )
     if file:
-        im.convert('L').save(file.name)
+        im.save(file.name)
 
 
 def configure_im():
