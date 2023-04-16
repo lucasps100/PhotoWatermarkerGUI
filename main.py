@@ -1,6 +1,7 @@
 from tkinter import filedialog as fd, Canvas, Tk, Button, Label, font, OptionMenu, StringVar, IntVar
 from PIL import Image, ImageTk, PSDraw
 
+# ------------------- Constants --------------------------
 FONT_NAME = "Nirmala UI"
 GREEN = "#00C5CD"
 bg = "#ABBFB6"
@@ -9,7 +10,7 @@ water_size_list = range(1, 21, 1)
 position_list = ["bottomright", "bottomleft", "topright", "topleft", "center"]
 opacity_list = range(0, 16)
 
-
+# ------------------- Functions ------------------------
 
 def resize_im():
     global im, width, height
@@ -30,7 +31,7 @@ def select_water():
 
 
 def resize_water():
-    global water_im, water_size, sizes_var, w_width, w_height
+    global water_im, sizes_var, w_width, w_height
     water_size = sizes_var.get() / 20
     w_width = round(water_size*water_im.size[0])
     w_height = round(water_size*water_im.size[1])
@@ -39,29 +40,41 @@ def resize_water():
 
 
 def select_file():
-    global photo
-    global new_photo
-    global im, filename
+    global filename
     filename = fd.askopenfilename(
         title='Open an image',
         initialdir='/'
     )
     configure_im()
 
+def saveas():
+    global im
+    file = fd.asksaveasfile(
+        title="Save As",
+        initialdir='/',
+        filetypes=(('PNG', '*.png'),
+                   ('JPG', '*.jpg')),
+        initialfile=f'{filename.split("/")[-1].split(".")[0]}-watermarked',
+        defaultextension='*.png',
+        mode='w'
+    )
+    if file:
+        im.convert('L').save(file.name)
+
+
 def configure_im():
-    global im, new_photo, photo, width, height
+    global im, photo, new_photo
     im = Image.open(filename).convert("RGBA")
     resize_im()
     new_photo = ImageTk.PhotoImage(im)
     canvas.itemconfig(photo, image=new_photo)
-    canvas.config(height=height, width=width)
-    canvas.coords(photo, width // 2, height // 2)
+    canvas.config(height=im.size[1], width=im.size[0])
+    canvas.coords(photo, im.size[0] // 2, im.size[1] // 2)
 
 def add_water():
-    global im, position_dict, w_width, w_height, posi_var, opacity_var
-    global water_im, watername, filename
+    global im, w_width, w_height, posi_var, opacity_var, new_photo
+    global water_im, watername
     global photo
-    global new_photo
     opacity = opacity_var.get()
     position = posi_var.get()
     water_im = Image.open(watername).convert("RGBA")
@@ -90,9 +103,12 @@ window.config(padx=50, pady=50, bg=bg)
 
 fonts_list = list(font.families())
 print(fonts_list)
-
+# ----------------- Canvas ---------------------------------
 canvas = Canvas(width=800, height=500, bg=bg, highlightthickness=0)
+canvas.grid(column=2, row=1, columnspan=2, rowspan=6)
 
+
+#------------------ Menus ----------------------------------
 sizes_var = IntVar(window)
 sizes_var.set(water_size_list[9])
 size_menu = OptionMenu(window, sizes_var, *water_size_list)
@@ -107,7 +123,7 @@ opacity_var = IntVar(window)
 opacity_var.set(opacity_list[-1])
 opacity_menu = OptionMenu(window, opacity_var, *opacity_list)
 opacity_menu.grid(column=1, row=4)
-
+#------------------------- Initialize --------------------------
 filename = 'Images/default_im.jpg'
 im = Image.open(filename)
 watername = 'Images/default_mark.jpg'
@@ -117,10 +133,26 @@ PI = ImageTk.PhotoImage(im)
 photo = canvas.create_image(width//2, height//2, image=PI)
 add_water()
 
-canvas.grid(column=2, row=1, columnspan=2, rowspan=6)
+# -------------------------- Labels ------------------------------------
 
 title_label = Label(text="Luke's Water Marker", fg=GREEN, bg=bg, font=(FONT_NAME, 45, "bold"))
 title_label.grid(column=2, row=0, columnspan=2)
+
+size_label = Label(text="Size:", bg=bg, font=(FONT_NAME, 15, "bold"))
+size_label.grid(column=0, row=2)
+
+position_label = Label(text="Position:", bg=bg, font=(FONT_NAME, 15, "bold"))
+position_label.grid(column=0, row=3)
+
+opacity_label = Label(text="Transparancy:", bg=bg, font=(FONT_NAME, 15, "bold"))
+opacity_label.grid(column=0, row=4)
+
+# ------------------------ Buttons -------------------------
+apply_butt = Button(
+    text="Apply Changes",
+    command=add_water
+)
+apply_butt.grid(column=0, row=5, columnspan=2)
 
 open_button = Button(
     text='Open an Image File',
@@ -136,24 +168,13 @@ open_water = Button(
 )
 open_water.grid(column=3, row=7, pady=10)
 
-size_label = Label(text="Size:", bg=bg, font=(FONT_NAME, 15, "bold"))
-size_label.grid(column=0, row=2)
-
-position_label = Label(text="Position:", bg=bg, font=(FONT_NAME, 15, "bold"))
-position_label.grid(column=0, row=3)
-
-opacity_label = Label(text="Transparancy:", bg=bg, font=(FONT_NAME, 15, "bold"))
-opacity_label.grid(column=0, row=4)
-
-apply_butt = Button(
-    text="Apply Changes",
-    command=add_water
+save_button = Button(
+    text="Save As",
+    command=saveas
 )
-apply_butt.grid(column=0, row=5, columnspan=2)
+save_button.grid(row=7, column=0)
 
 
 window.mainloop()
 
-#TODO: Organize and label items.
-#TODO: Add saveas button.
 #TODO: Add watermark designing functionality(text/drawing/filters)
