@@ -155,3 +155,5 @@ apply_butt.grid(column=0, row=5, columnspan=2)
 window.mainloop()
 
 #TODO: Organize and label items.
+#TODO: Add saveas button.
+#TODO: Add watermark designing functionality(text/drawing/filters)
