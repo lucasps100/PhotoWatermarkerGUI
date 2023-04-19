@@ -18,12 +18,12 @@ fonts_list = [font.split("\\")[-1].split('.')[0] for font in font_list]
 
 font_size_list = range(5, 50, 5)
 
+
 # ------------------- Functions ------------------------
 def change_color():
     global color
     color_choice = askcolor(title="Choose font color")
     color = color_choice[0]
-    print(color)
 
 
 def resize_im():
@@ -45,7 +45,7 @@ def select_water():
 
 
 def resize_water():
-    global water_im, sizes_var, w_width, w_height
+    global water_im, w_width, w_height
     water_size = sizes_var.get() / 20
     w_width = round(water_size*water_im.size[0])
     w_height = round(water_size*water_im.size[1])
@@ -54,11 +54,13 @@ def resize_water():
 
 
 def select_file():
-    global filename
+    global filename, im
     filename = fd.askopenfilename(
         title='Open an image',
         initialdir='/'
     )
+    im = Image.open(filename).convert("RGBA")
+    resize_im()
     configure_im()
 
 def saveas():
@@ -77,43 +79,51 @@ def saveas():
 
 
 def configure_im():
-    global im, photo, new_photo
-    im = Image.open(filename).convert("RGBA")
-    resize_im()
+    global im, photo, new_photo, width, height
     new_photo = ImageTk.PhotoImage(im)
     canvas.itemconfig(photo, image=new_photo)
-    canvas.config(height=im.size[1], width=im.size[0])
-    canvas.coords(photo, im.size[0] // 2, im.size[1] // 2)
+    canvas.config(height=height, width=width)
+    canvas.coords(photo, width // 2, height // 2)
 
-def add_water():
-    global im, w_width, w_height, posi_var, opacity_var, new_photo, font_var
-    global water_im, watername, draw
-    global photo
-    global color, FONT_NAME
+def add_text():
+    global water_im, text, color, draw, IMG_FONT, w_width, w_height
     FONT_NAME = f'C:\\\\Windows\\\\Fonts\\\\{font_var.get()}.ttf'
     FONT_SIZE = font_size_var.get()
     IMG_FONT = ImageFont.truetype(FONT_NAME, FONT_SIZE)
-    opacity = opacity_var.get()
-    position = posi_var.get()
     TEXT_INPUT = text.get('1.0', 'end')
-    water_im = Image.open(watername).convert("RGBA")
-    resize_water()
     draw = ImageDraw.Draw(water_im)
     w, h = draw.textsize(TEXT_INPUT, font=IMG_FONT)
-    draw.multiline_text(((w_width - w)//2, (w_height-h)//2), TEXT_INPUT, color, font=IMG_FONT, align='center')
+    draw.multiline_text(((w_width - w) // 2, (w_height - h) // 2), TEXT_INPUT, color, font=IMG_FONT, align='center', )
+
+def position_water():
+    global width, height, w_width, w_height, im, water_im
     position_dict = {
         "topleft": (0, 0),
         "topright": (width - w_width, 0),
         "bottomleft": (0, height - w_height),
         "bottomright": (width - w_width, height - w_height),
-        "center": ((width-w_width) // 2, (height-w_height) // 2)
+        "center": ((width - w_width) // 2, (height - w_height) // 2)
     }
-    configure_im()
-    water_im.putalpha(17*opacity)
+    position = posi_var.get()
     im.paste(water_im, position_dict[position], water_im)
-    new_photo = ImageTk.PhotoImage(im)
-    canvas.itemconfig(photo, image=new_photo)
     canvas.coords(position_dict[position][0], position_dict[position][1])
+
+def change_opacity():
+    global water_im
+    opacity = opacity_var.get()
+    water_im.putalpha(17 * opacity)
+
+def add_water():
+    global water_im, im, watername, filename
+    im = Image.open(filename).convert("RGBA")
+    water_im = Image.open(watername).convert("RGBA")
+    resize_im()
+    resize_water()
+    add_text()
+    change_opacity()
+    position_water()
+    configure_im()
+
 
 
 
