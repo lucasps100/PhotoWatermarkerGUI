@@ -7,7 +7,6 @@ import matplotlib.font_manager as fm
 class WaterMark():
     def __init__(self):
         FONT_NAME = "Nirmala UI"
-        GREEN = "#00C5CD"
         bg = "#ABBFB6"
         self.font_name = "Nirmala UI"
         self.water_size_list = range(1, 21, 1)
@@ -15,7 +14,7 @@ class WaterMark():
         self.opacity_list = range(0, 16)
         self.font_color = 'black'
         font_list = fm.findSystemFonts(fontpaths=None, fontext='ttf')
-        self.fonts_list = [font.split("\\")[-1].split('.')[0] for font in font_list]
+        self.fonts_list = sorted([font.split("\\")[-1].split('.')[0] for font in font_list])
         self.font_size_list = range(5, 50, 5)
         self.window = Tk()
         self.window.title("Watermarker")
@@ -27,7 +26,7 @@ class WaterMark():
 
         # ----------------- Text -----------------------------------
         self.text = Text(width=15, height=3)
-        self.text.insert('end', "Fred Herbert")
+        self.text.insert('end', "Luke's Watermarker")
         self.text.grid(column=1, row=5, padx=10)
 
         self.font_size_var = IntVar(self.window)
@@ -67,7 +66,7 @@ class WaterMark():
         self.font_color_lab = Label(text='Font Color:', bg=bg, font=(FONT_NAME, 15, "bold"))
         self.font_color_lab.grid(column=0, row=8)
 
-        self.title_label = Label(text="Luke's Water Marker", fg=GREEN, bg=bg, font=(FONT_NAME, 45, "bold"))
+        self.title_label = Label(text="Luke's Watermarker", fg="blue", bg=bg, font=(FONT_NAME, 45, "bold"))
         self.title_label.grid(column=2, row=0, columnspan=2)
 
         self.size_label = Label(text="Size:", bg=bg, font=(FONT_NAME, 15, "bold"))
